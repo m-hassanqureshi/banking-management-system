@@ -1,1 +1,55 @@
+class DataBaseTasks:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class BankProcess:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class App:
+  
+
+
+
+  
+
+
+
+
 
