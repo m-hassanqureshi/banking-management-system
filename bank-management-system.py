@@ -1,4 +1,6 @@
 import sqlite3 as sq
+import tkinter as tk
+from tkinter import messagebox
 
 class DataBaseTasks:
     def __init__(self, db_file):
@@ -84,3 +86,105 @@ class DataBaseTasks:
         return data
 
 self.conn.close()
+
+class Bank:
+    def __init__(self):
+        self.db = DataBaseTasks('bank.db')
+
+    def create_account(self, account_id, password, email, phone, address, balance):
+        pass
+
+    def view_account(self, password):
+        pass
+    def delete_account(self, password):
+        pass
+
+    def update_account(self, account_id, password, email, phone, address, balance):
+        pass 
+
+    def deposit_amount(self, amount, account_id, password):
+        pass
+
+    def withdraw_amount(self, account_id, password, amount):
+        pass
+    def transfer_amount(self, sender_account_id, receiver_account_id, amount):
+        pass
+
+    def view_balance(self, account_id):
+        pass
+    def record_transaction_detail(self, account_id, transaction_type, transaction_amount, description):
+        pass
+    def transaction_history(self, account_id):    
+        pass
+
+class App:
+    def __init__(self, master):
+        self.master = master
+        self.bank = Bank()
+        self.create_widgets()
+
+    def create_widgets(self):
+        self.account_id_label = tk.Label(self.master, text="Account ID:")
+        self.account_id_label.grid(row=0, column=0, padx=5, pady=5)
+        self.account_id_entry = tk.Entry(self.master)
+        self.account_id_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        self.password_label = tk.Label(self.master, text="Password:")
+        self.password_label.grid(row=1, column=0, padx=5, pady=5)
+        self.password_entry = tk.Entry(self.master, show="*")
+        self.password_entry.grid(row=1, column=1, padx=5, pady=5)
+
+        self.email_label = tk.Label(self.master, text="Email:")
+        self.email_label.grid(row=2, column=0, padx=5, pady=5)
+        self.email_entry = tk.Entry(self.master)
+        self.email_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        self.phone_label = tk.Label(self.master, text="Phone:")
+        self.phone_label=grid(row=2, column=2, padx=5, pady=5)
+        self.phone_entry = tk.Entry(self.master)
+        self.phone_entry.grid(row=2, column=3, padx=5, pady=5)
+
+        self.address_label = tk.Label(self.master, text="Address:")
+        self.address_label.grid(row=3, column=0, padx=5, pady=5)
+        self.address_entry = tk.Entry(self.master)
+        self.address_entry.grid(row=3, column=1, padx=5, pady=5)
+
+        self.balance_label = tk.Label(self.master, text="Balance:")
+        self.balance_label.grid(row=4, column=0, padx=5, pady=5)
+        self.balance_entry = tk.Entry(self.master)
+        self.balance_entry.grid(row=4, column=1, padx=5, pady=5)
+
+        self.create_account_button = tk.Button(self.master, text="Create Account", command=self.create_account)
+        self.create_account_button.grid(row=5, column=0, padx=5, pady=5)
+
+        self.view_account_button = tk.Button(self.master, text="View Account", command=self.view_account)
+        self.view_account_button.grid(row=5, column=1, padx=5, pady=5)
+
+        self.delete_account_button = tk
+
+    def create_account(self):
+        account_id = self.account_id_entry.get()
+        password = self.password_entry.get()
+        email = self.email_entry.get()
+        phone = self.phone_entry.get()
+        address = self.address_entry.get()
+        balance = self.balance_entry.get()
+        self.bank.create_account(account_id, password, email, phone, address, balance)
+
+    def view_account(self):
+        password = self.password_entry.get()
+        data = self.bank.view_account(password)
+        messagebox.showinfo("Account Details", f"Account ID: {data[0][0]}\nPassword: {data[0][1]}\nEmail: {data[0][2]}\nPhone: {data[0][3]}\nAddress: {data[0][4]}\nBalance: {data[0][5]}")
+    def delete
+    def withdraw(self):
+        account_id = self.account_id_entry.get()
+        password = self.password_entry.get()
+        amount = self.amount_entry.get()
+        self.bank.withdraw_amount(account_id, password, amount)
+    def deposit(self):
+        account_id = self.account_id_entry.get()
+        password = self.password_entry.get()
+        amount = self.amount_entry.get()
+        self.bank.deposit_amount(account_id, password, amount)
+
+    
