@@ -82,3 +82,5 @@ class DataBaseTasks:
         self.cur.execute('SELECT * FROM transaction_history WHERE account_id=?', (account_id,))
         data = self.cur.fetchall()
         return data
+
+self.conn.close()
