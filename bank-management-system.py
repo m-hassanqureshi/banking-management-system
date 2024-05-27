@@ -92,15 +92,37 @@ class Bank:
         self.db = DataBaseTasks('bank.db')
 
     def create_account(self, account_id, password, email, phone, address, balance):
-        pass
-
+        self.account_id = account_id
+        self.password = password
+        self.email = email
+        self.phone = phone
+        self.address = address
+        self.balance = balance
+        self.db.create_account(self.account_id, self.password, self.email, self.phone, self.address, self.balance)
+        
     def view_account(self, password):
-        pass
+        self.password = password
+        if self.db.password == self.password:
+            self.db.view_account(self.password)
+        else:
+            raise exception("Wrong Password!")
     def delete_account(self, password):
-        pass
-
+        self.password = password
+        if self.db.password == self.password:
+            self.db.delete_account(self.password)
+        else:
+            raise exception("Wrong Password!")        
     def update_account(self, account_id, password, email, phone, address, balance):
-        pass 
+        self.account_id = account_id
+        self.password = password
+        self.email = email
+        self.phone = phone
+        self.address = address
+        self.balance = balance
+        if self.db.password == self.password:
+            self.db.update_account(self.account_id, self.password, self.email, self.phone, self.address, self.balance, self.db.password)
+        else:
+            raise exceptiom("Wrong Password!")
 
     def deposit_amount(self, amount, account_id, password):
         pass
