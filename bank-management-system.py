@@ -24,32 +24,48 @@ class DataBaseTasks:
                              transaction_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                              description VARCHAR(255),
                              FOREIGN KEY (account_id) REFERENCES bank(account_id));''')
+        self.cur.execute('''CREATE TABLE IF NOT EXIST admin
+        (username VARCHAR(15),
+        password VARCHAR(12));''')
         self.conn.commit()
 
     def create_account(self, account_id, password, email, phone, address, balance):
-        self.cur.execute('INSERT INTO bank VALUES (?, ?, ?, ?, ?, ?)', (account_id, password, email, phone, address, balance))
-        self.conn.commit()
+        try:
+            self.cur.execute('INSERT INTO bank VALUES (?, ?, ?, ?, ?, ?)', (account_id, password, email, phone, address, balance))
+            self.conn.commit()
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Account ID already exists")
 
     def view_account(self, password):
-        self.cur.execute('SELECT * FROM bank WHERE password=?', (password,))
-        data = self.cur.fetchall()
-        return data
-
+        try:
+            self.cur.execute('SELECT * FROM bank WHERE password=?', (password,))
+            data = self.cur.fetchall()
+            return data
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Invalid password")
     def delete_account(self, password):
-        self.cur.execute('DELETE FROM bank WHERE password=?', (password,))
-        self.conn.commit()
+        try:
+            self.cur.execute('DELETE FROM bank WHERE password=?', (password,))
+            self.conn.commit()
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Invalid password")
 
     def update_account(self, account_id, password, email, phone, address, balance):
-        self.cur.execute('UPDATE bank SET account_id=?, password=?, email=?, phone=?, address=? WHERE password=?', (account_id, password, email, phone, address, password))
-        self.conn.commit()
-
+        try:
+            self.cur.execute('UPDATE bank SET account_id=?, password=?, email=?, phone=?, address=? WHERE password=?', (account_id, password, email, phone, address, password))
+            self.conn.commit()
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Invalid password")
     def deposit_amount(self, amount, account_id, password):
-        self.cur.execute('SELECT balance FROM bank WHERE password=?', (password,))
-        balance = self.cur.fetchone()[0]
-        new_balance = balance + amount
-        self.cur.execute('UPDATE bank SET balance=? WHERE password=?', (new_balance, password))
-        self.conn.commit()
-        self.record_transaction_detail(account_id, "deposit", amount, f"{account_id} deposit amount {amount} successfully")
+        try:
+            self.cur.execute('SELECT balance FROM bank WHERE password=?', (password,))
+            balance = self.cur.fetchone()[0]
+            new_balance = balance + amount
+            self.cur.execute('UPDATE bank SET balance=? WHERE password=?', (new_balance, password))
+            self.conn.commit()
+            self.record_transaction_detail(account_id, "deposit", amount, f"{account_id} deposit amount {amount} successfully")
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Invalid password")
 
     def withdraw_amount(self, account_id, password, amount):
         self.cur.execute('SELECT balance FROM bank WHERE password=?', (password,))
@@ -72,39 +88,66 @@ class DataBaseTasks:
         self.record_transaction_detail(sender_account_id, "transfer", amount, f"{sender_account_id} transfer amount {amount} to {receiver_account_id} successfully")
 
     def view_balance(self, account_id):
-        self.cur.execute('SELECT balance FROM bank WHERE account_id=?', (account_id,))
-        balance = self.cur.fetchone()[0]
-        return balance
+        try:
+            self.cur.execute('SELECT balance FROM bank WHERE account_id=?', (account_id,))
+            balance = self.cur.fetchone()[0]
+            return balance
+        except sq.OperationalError:
+            messagebox.showerror("Error", "Invalid account ID")
 
     def record_transaction_detail(self, account_id, transaction_type, transaction_amount, description):
-        self.cur.execute('INSERT INTO transaction_history (account_id, transaction_type, amount, transaction_date, description) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)', (account_id, transaction_type, transaction_amount, description))
-        self.conn.commit()
-
+        try:
+            self.cur.execute('INSERT INTO transaction_history (account_id, transaction_type, amount, transaction_date, description) VALUES (?, ?, ?, CURRENT_TIMESTAMP, ?)', (account_id, transaction_type, transaction_amount, description))
+            self.conn.commit()
+        except sq.OperationalError:
+            messagebox.showerror("Error , Invalid account id")
     def transaction_history(self, account_id):
-        self.cur.execute('SELECT * FROM transaction_history WHERE account_id=?', (account_id,))
-        data = self.cur.fetchall()
-        return data
-
+        try:
+            self.cur.execute('SELECT * FROM transaction_history WHERE account_id=?', (account_id,))
+            data = self.cur.fetchall()
+            return data
+        except sq.OperationalError:
+            messagebox.showerror("Error ,Invalid  Account Id")
+    def get_password(account_id):
+        self.cur.execute('SELECT password FROM bank WHERE account_id=?', (account_id,))
+        password = self.cur.fetchone()[0]
+        return password 
+    def get_account_id(password):
+        self.cur.execute('SELECT account_id FROM bank WHERE password=?', (password,))
+        account_id = self.cur.fetchone()[0]
+        return account_id
 self.conn.close()
 
 class Bank:
     def __init__(self):
         self.db = DataBaseTasks('bank.db')
-
+    def authentication(self,account_id , password):
+        stored_id=self.db.get_account_id(password)
+        stored_password=self.db.get_password(account_id)
+    if (stored_password is not None and stored_password == password) and (stored_id is not None and stored_id== account_id):
+        return True
+    else:
+        return False
     def create_account(self, account_id, password, email, phone, address, balance):
-        pass
-
-    def view_account(self, password):
-        pass
+        self.db.create_account(account_id, password, email, phone, address, balance)
+    def view_account(self,account_id,password):
+        if self.authentication(account_id,password)==True:
+            self.db.view_account(account_id)
+        else:
+            messagebox.showerror("Error","Invalid Account Id or Password")
     def delete_account(self, password):
         pass
 
     def update_account(self, account_id, password, email, phone, address, balance):
-        pass
-
+        if self.authentication(account_id,password)==True:
+            self.db.update_account( account_id, password, email, phone, address, balance)
+        else:
+            messagebox.showerror("Error","Invalid Account Id or Password")
     def deposit_amount(self, amount, account_id, password):
-        pass
-
+        if self.authentication(account_id,password)==True:
+            self.db.deposit_amount(amount,account_id,password)
+        else:
+            messagebox.showerror("Error","Invalid Account Id or Password")
     def withdraw_amount(self, account_id, password, amount):
         pass
     def transfer_amount(self, sender_account_id, receiver_account_id, amount):
