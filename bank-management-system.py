@@ -92,14 +92,15 @@ class Bank:
         self.db = DataBaseTasks('bank.db')
 
     def create_account(self, account_id, password, email, phone, address, balance):
-        pass 
+        pass
+
     def view_account(self, password):
         pass
     def delete_account(self, password):
-        pass 
+        pass
 
     def update_account(self, account_id, password, email, phone, address, balance):
-        pass 
+        pass
 
     def deposit_amount(self, amount, account_id, password):
         pass
