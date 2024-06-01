@@ -64,7 +64,7 @@ The Bank Management System is a Python-based application that provides a graphic
 
 ## Code Structure
 
-- `main.py`: Contains the main application logic and GUI setup.
+- `bank-mmanagement-system.py`: Contains the main application logic and GUI setup.
 - `DataBaseTasks`: Class handling all database-related operations.
 - `Bank`: Class containing business logic for banking operations.
 - `App`: Class managing the GUI and user interactions.
