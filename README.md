@@ -76,4 +76,4 @@ This project is licensed under the MIT License.
 Contributions are welcome! Please fork the repository and submit a pull request for review.
 
 ## Contact
-For questions or suggestions, please open an issue or contact [Linkedin](https://www.linkedin.com/in/m-hassan-qureshi/).
+For questions or suggestions, please open an issue or contact at [Linkedin](https://www.linkedin.com/in/m-hassan-qureshi/).
