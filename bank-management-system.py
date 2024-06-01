@@ -26,7 +26,7 @@ class DataBaseTasks:
                              description VARCHAR(255),
                              FOREIGN KEY (account_id) REFERENCES bank_users(account_id));''')
         self.cur.execute('''CREATE TABLE IF NOT EXISTS bank_admins
-                            (username VARCHAR(15),
+                            (admin_name VARCHAR(15),
                              password VARCHAR(12));''')
         self.conn.commit()
 
@@ -103,13 +103,13 @@ class DataBaseTasks:
         account_id = self.cur.fetchone()[0]
         return account_id
 
-    def get_admin_username(self, password):
-        self.cur.execute('SELECT username FROM bank_admins WHERE password=?', (password,))
-        username = self.cur.fetchone()[0]
-        return username
+    def get_admin_name(self, password):
+        self.cur.execute('SELECT admin_name FROM bank_admins WHERE password=?', (password,))
+        admin_name = self.cur.fetchone()[0]
+        return admin_name
 
-    def get_admin_password(self, username):
-        self.cur.execute('SELECT password FROM bank_admins WHERE username=?', (username,))
+    def get_admin_password(self, admin_name):
+        self.cur.execute('SELECT password FROM bank_admins WHERE admin_name=?', (admin_name,))
         password = self.cur.fetchone()[0]
         return password
 
@@ -120,10 +120,10 @@ class Bank:
     def __init__(self):
         self.db = DataBaseTasks('bank.db')
 
-    def admin_login(self, username, password):
-        stored_admin_username = self.db.get_admin_username(password)
-        stored_admin_password = self.db.get_admin_password(username)
-        if stored_admin_password is not None and stored_admin_password == password and stored_admin_username is not None and stored_admin_username == username:
+    def admin_login(self, admin_name, password):
+        stored_admin_name = self.db.get_admin_name(password)
+        stored_admin_password = self.db.get_admin_password(admin_name)
+        if stored_admin_password is not None and stored_admin_password == password and stored_admin_name is not None and stored_admin_name == admin_name:
             return True
         else:
             return False
@@ -136,11 +136,11 @@ class Bank:
         else:
             return False
 
-    def create_account(self, account_id, password, email, phone, address, balance, admin_username, admin_password):
-        if self.admin_login(admin_username, admin_password):
+    def create_account(self, account_id, password, email, phone, address, balance, admin_admin_name, admin_password):
+        if self.admin_login(admin_name, admin_password):
             self.db.create_account(account_id, password, email, phone, address, balance)
         else:
-            messagebox.showerror("Error", "Invalid Admin Username or Password")
+            messagebox.showerror("Error", "Invalid Admin admin_name or Password")
 
     def view_account(self, account_id, password):
         if self.authentication(account_id, password):
@@ -149,11 +149,11 @@ class Bank:
             messagebox.showerror("Error", "Invalid Account Id or Password")
             return None
 
-    def delete_account(self, account_id, admin_username, admin_password):
-        if self.admin_login(admin_username, admin_password):
+    def delete_account(self, account_id, admin_name, admin_password):
+        if self.admin_login(admin_name, admin_password):
             self.db.delete_account(account_id)
         else:
-            messagebox.showerror("Error", "Invalid Admin Username or Password")
+            messagebox.showerror("Error", "Invalid Admin admin_name or Password")
 
     def update_account(self, account_id, password, email, phone, address, balance):
         if self.authentication(account_id, password):
@@ -207,17 +207,21 @@ class App:
         self.is_admin = False
         self.master.title("Bank Management System")
         self.master.geometry("500x400")
-        self.master.configure(bg="#1a1a2e")
+        self.master.configure(bg="#2c3e50")
         self.create_widgets()
+
+    def clear_window(self):
+        for widget in self.master.winfo_children():
+            widget.destroy()
 
     def create_widgets(self):
         self.master.grid_columnconfigure(1, weight=1)
         
         ctk.set_appearance_mode("light")
-        ctk.set_default_color_theme("dark-blue")
+        ctk.set_default_color_theme("blue")
         
-        self.role_label = ctk.CTkLabel(self.master, text="Login as:", font=("Helvetica", 16))
-        self.role_label.grid(row=0, column=0, padx=20, pady=20, sticky="W")
+        self.role_label = ctk.CTkLabel(self.master, text="Login as:")
+        self.role_label.grid(row=0, column=0, padx=10, pady=20, sticky="W")
 
         self.role_var = ctk.StringVar(value="user")
         self.user_radio = ctk.CTkRadioButton(self.master, text="User", variable=self.role_var, value="user", command=self.update_role)
@@ -226,24 +230,24 @@ class App:
         self.admin_radio = ctk.CTkRadioButton(self.master, text="Admin", variable=self.role_var, value="admin", command=self.update_role)
         self.admin_radio.grid(row=0, column=2, padx=10, pady=20, sticky="W")
 
-        self.account_label = ctk.CTkLabel(self.master, text="Account ID:", font=("Helvetica", 14))
-        self.account_label.grid(row=1, column=0, padx=20, pady=10, sticky="W")
+        self.account_label = ctk.CTkLabel(self.master, text="Account ID:")
+        self.account_label.grid(row=1, column=0, padx=10, pady=10, sticky="W")
 
-        self.account_entry = ctk.CTkEntry(self.master, font=("Helvetica", 14))
-        self.account_entry.grid(row=1, column=1, padx=20, pady=10, columnspan=2, sticky="WE")
+        self.account_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        self.account_entry.grid(row=1, column=1, padx=10, pady=10, columnspan=2, sticky="WE")
 
-        self.password_label = ctk.CTkLabel(self.master, text="Password:", font=("Helvetica", 14))
-        self.password_label.grid(row=2, column=0, padx=20, pady=10, sticky="W")
+        self.password_label = ctk.CTkLabel(self.master, text="Password:")
+        self.password_label.grid(row=2, column=0, padx=10, pady=10, sticky="W")
 
-        self.password_entry = ctk.CTkEntry(self.master, show="*", font=("Helvetica", 14))
-        self.password_entry.grid(row=2, column=1, padx=20, pady=10, columnspan=2, sticky="WE")
+        self.password_entry = ctk.CTkEntry(self.master, show="*", font=("Arial", 12))
+        self.password_entry.grid(row=2, column=1, padx=10, pady=10, columnspan=2, sticky="WE")
 
-        self.login_button = ctk.CTkButton(self.master, text="Login", command=self.login, font=("Helvetica", 14))
-        self.login_button.grid(row=3, column=0, padx=20, pady=20, columnspan=3)
+        self.login_button = ctk.CTkButton(self.master, text="Login", command=self.login)
+        self.login_button.grid(row=3, column=0, padx=10, pady=20, columnspan=3)
 
     def update_role(self):
         self.is_admin = self.role_var.get() == "admin"
-        self.account_label.configure(text="Username:" if self.is_admin else "Account ID:")
+        self.account_label.configure(text="Name:" if self.is_admin else "Account ID:")
 
     def login(self):
         account_id = self.account_entry.get()
@@ -252,7 +256,7 @@ class App:
             if self.bank.admin_login(account_id, password):
                 self.admin_window()
             else:
-                messagebox.showerror("Error", "Invalid Admin Username or Password")
+                messagebox.showerror("Error", "Invalid  admin_name or Password")
         else:
             if self.bank.authentication(account_id, password):
                 self.user_window(account_id, password)
@@ -260,218 +264,204 @@ class App:
                 messagebox.showerror("Error", "Invalid Account ID or Password")
 
     def admin_window(self):
-        admin_window = ctk.CTkToplevel(self.master)
-        admin_window.title("Admin Panel")
-        admin_window.geometry("400x200")
-        admin_window.configure(bg="#1a1a2e")
+        self.clear_window()
 
-        self.create_acc_button = ctk.CTkButton(admin_window, text="Create Account", command=self.create_account, font=("Helvetica", 14))
-        self.create_acc_button.grid(row=0, column=0, padx=20, pady=10)
+        self.create_acc_button = ctk.CTkButton(self.master, text="Create Account", command=self.create_account)
+        self.create_acc_button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.delete_acc_button = ctk.CTkButton(admin_window, text="Delete Account", command=self.delete_account, font=("Helvetica", 14))
-        self.delete_acc_button.grid(row=0, column=1, padx=20, pady=10)
+        self.delete_acc_button = ctk.CTkButton(self.master, text="Delete Account", command=self.delete_account)
+        self.delete_acc_button.grid(row=0, column=1, padx=10, pady=10)
+
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=self.create_widgets)
+        self.back_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
 
     def user_window(self, account_id, password):
-        user_window = ctk.CTkToplevel(self.master)
-        user_window.title("User Panel")
-        user_window.geometry("500x400")
-        user_window.configure(bg="#1a1a2e")
+        self.clear_window()
 
-        self.view_bal_button = ctk.CTkButton(user_window, text="View Balance", command=lambda: self.view_balance(account_id, password), font=("Helvetica", 14))
-        self.view_bal_button.grid(row=0, column=0, padx=20, pady=10)
+        self.view_bal_button = ctk.CTkButton(self.master, text="View Balance", command=lambda: self.view_balance(account_id, password))
+        self.view_bal_button.grid(row=0, column=0, padx=10, pady=10)
 
-        self.deposit_button = ctk.CTkButton(user_window, text="Deposit Amount", command=lambda: self.deposit_amount(account_id, password), font=("Helvetica", 14))
-        self.deposit_button.grid(row=0, column=1, padx=20, pady=10)
+        self.deposit_button = ctk.CTkButton(self.master, text="Deposit Amount", command=lambda: self.deposit_amount(account_id, password))
+        self.deposit_button.grid(row=0, column=1, padx=10, pady=10)
 
-        self.withdraw_button = ctk.CTkButton(user_window, text="Withdraw Amount", command=lambda: self.withdraw_amount(account_id, password), font=("Helvetica", 14))
-        self.withdraw_button.grid(row=0, column=2, padx=20, pady=10)
+        self.withdraw_button = ctk.CTkButton(self.master, text="Withdraw Amount", command=lambda: self.withdraw_amount(account_id, password))
+        self.withdraw_button.grid(row=0, column=2, padx=10, pady=10)
 
-        self.transfer_button = ctk.CTkButton(user_window, text="Transfer Amount", command=lambda: self.transfer_amount(account_id, password), font=("Helvetica", 14))
-        self.transfer_button.grid(row=1, column=0, padx=20, pady=10)
+        self.transfer_button = ctk.CTkButton(self.master, text="Transfer Amount", command=lambda: self.transfer_amount(account_id, password))
+        self.transfer_button.grid(row=1, column=0, padx=10, pady=10)
 
-        self.view_trans_hist_button = ctk.CTkButton(user_window, text="View Transaction History", command=lambda: self.view_transaction_history(account_id, password), font=("Helvetica", 14))
-        self.view_trans_hist_button.grid(row=1, column=1, padx=20, pady=10)
-    
-        self.view_acc_button = ctk.CTkButton(user_window, text="View Account Details", command=lambda: self.view_account_details(account_id, password), font=("Helvetica", 14))
-        self.view_acc_button.grid(row=1, column=2, padx=20, pady=10)
-    
-        self.update_acc_button = ctk.CTkButton(user_window, text="Update Account Information", command=lambda: self.update_account_info(account_id, password), font=("Helvetica", 14))
-        self.update_acc_button.grid(row=2, column=0, padx=20, pady=10)
+        self.view_trans_hist_button = ctk.CTkButton(self.master, text="View Transaction History", command=lambda: self.view_transaction_history(account_id, password))
+        self.view_trans_hist_button.grid(row=1, column=1, padx=10, pady=10)
+
+        self.view_acc_button = ctk.CTkButton(self.master, text="View Account Info", command=lambda: self.view_account(account_id, password))
+        self.view_acc_button.grid(row=2, column=0, padx=10, pady=10)
+
+        self.update_acc_button = ctk.CTkButton(self.master, text="Update Account Info", command=lambda: self.update_account(account_id, password))
+        self.update_acc_button.grid(row=2, column=1, padx=10, pady=10)
+
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=self.create_widgets)
+        self.back_button.grid(row=3, column=0, padx=10, pady=20, columnspan=3)
 
     def create_account(self):
-        def create():
-            account_id = account_id_entry.get()
-            password = password_entry.get()
-            email = email_entry.get()
-            phone = phone_entry.get()
-            address = address_entry.get()
-            balance = float(balance_entry.get())
-            admin_username = self.account_entry.get()
-            admin_password = self.password_entry.get()
-            self.bank.create_account(account_id, password, email, phone, address, balance, admin_username, admin_password)
-            create_acc_window.destroy()
+        self.clear_window()
 
-        create_acc_window = ctk.CTkToplevel(self.master)
-        create_acc_window.title("Create Account")
-        create_acc_window.geometry("400x350")
-        create_acc_window.configure(bg="#1a1a2e")
+        ctk.CTkLabel(self.master, text="Account ID:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        account_id_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        account_id_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Account ID:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        account_id_entry = ctk.CTkEntry(create_acc_window, font=("Helvetica", 14))
-        account_id_entry.grid(row=0, column=1, padx=20, pady=10)
+        ctk.CTkLabel(self.master, text="Password:").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+        password_entry = ctk.CTkEntry(self.master, show="*", font=("Arial", 12))
+        password_entry.grid(row=1, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Password:", font=("Helvetica", 14)).grid(row=1, column=0, padx=20, pady=10, sticky="W")
-        password_entry = ctk.CTkEntry(create_acc_window, show="*", font=("Helvetica", 14))
-        password_entry.grid(row=1, column=1, padx=20, pady=10)
+        ctk.CTkLabel(self.master, text="Email:").grid(row=2, column=0, padx=10, pady=10, sticky="W")
+        email_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        email_entry.grid(row=2, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Email:", font=("Helvetica", 14)).grid(row=2, column=0, padx=20, pady=10, sticky="W")
-        email_entry = ctk.CTkEntry(create_acc_window, font=("Helvetica", 14))
-        email_entry.grid(row=2, column=1, padx=20, pady=10)
+        ctk.CTkLabel(self.master, text="Phone:").grid(row=3, column=0, padx=10, pady=10, sticky="W")
+        phone_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        phone_entry.grid(row=3, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Phone:", font=("Helvetica", 14)).grid(row=3, column=0, padx=20, pady=10, sticky="W")
-        phone_entry = ctk.CTkEntry(create_acc_window, font=("Helvetica", 14))
-        phone_entry.grid(row=3, column=1, padx=20, pady=10)
+        ctk.CTkLabel(self.master, text="Address:").grid(row=4, column=0, padx=10, pady=10, sticky="W")
+        address_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        address_entry.grid(row=4, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Address:", font=("Helvetica", 14)).grid(row=4, column=0, padx=20, pady=10, sticky="W")
-        address_entry = ctk.CTkEntry(create_acc_window, font=("Helvetica", 14))
-        address_entry.grid(row=4, column=1, padx=20, pady=10)
+        ctk.CTkLabel(self.master, text="Balance:").grid(row=5, column=0, padx=10, pady=10, sticky="W")
+        balance_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        balance_entry.grid(row=5, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(create_acc_window, text="Balance:", font=("Helvetica", 14)).grid(row=5, column=0, padx=20, pady=10, sticky="W")
-        balance_entry = ctk.CTkEntry(create_acc_window, font=("Helvetica", 14))
-        balance_entry.grid(row=5, column=1, padx=20, pady=10)
+        create_button = ctk.CTkButton(self.master, text="Create", command=lambda: self.bank.create_account(
+            account_id_entry.get(), password_entry.get(), email_entry.get(), phone_entry.get(), address_entry.get(),
+            float(balance_entry.get()), self.account_entry.get(), self.password_entry.get()
+        ))
+        create_button.grid(row=6, column=0, padx=10, pady=20, columnspan=2)
 
-        create_button = ctk.CTkButton(create_acc_window, text="Create", command=create, font=("Helvetica", 14))
-        create_button.grid(row=6, column=0, padx=20, pady=20, columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=self.admin_window)
+        self.back_button.grid(row=7, column=0, padx=10, pady=20, columnspan=2)
 
     def delete_account(self):
-        def delete():
-            account_id = account_id_entry.get()
-            admin_username = self.account_entry.get()
-            admin_password = self.password_entry.get()
-            self.bank.delete_account(account_id, admin_username, admin_password)
-            delete_acc_window.destroy()
+        self.clear_window()
 
-        delete_acc_window = ctk.CTkToplevel(self.master)
-        delete_acc_window.title("Delete Account")
-        delete_acc_window.geometry("300x150")
-        delete_acc_window.configure(bg="#1a1a2e")
+        ctk.CTkLabel(self.master, text="Account ID:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        account_id_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        account_id_entry.grid(row=0, column=1, padx=10, pady=10)
 
-        ctk.CTkLabel(delete_acc_window, text="Account ID:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        account_id_entry = ctk.CTkEntry(delete_acc_window, font=("Helvetica", 14))
-        account_id_entry.grid(row=0, column=1, padx=20, pady=10)
+        delete_button = ctk.CTkButton(self.master, text="Delete", command=lambda: self.bank.delete_account(
+            account_id_entry.get(), self.account_entry.get(), self.password_entry.get()
+        ))
+        delete_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
 
-        delete_button = ctk.CTkButton(delete_acc_window, text="Delete", command=delete, font=("Helvetica", 14))
-        delete_button.grid(row=1, column=0, padx=20, pady=20, columnspan=2)
-    def view_account_details(self, account_id, password):
-        account_info = self.bank.view_account(account_id, password)
-        if account_info:
-            info_window = ctk.CTkToplevel(self.master)
-            info_window.title("Account Details")
-            info_window.geometry("400x300")
-            info_window.configure(bg="#1a1a2e")        
-            info_labels = ["Account ID:", "Password:", "Email:", "Phone:", "Address:", "Balance:"]
-            for i, info in enumerate(account_info[0]):
-                ctk.CTkLabel(info_window, text=f"{info_labels[i]} {info}", font=("Helvetica", 14)).grid(row=i, column=0, padx=20, pady=10, sticky="W")
-
-def update_account_info(self, account_id, password):
-    account_info = self.bank.view_account(account_id, password)
-    if account_info:
-        def update():
-            new_password = password_entry.get()
-            new_email = email_entry.get()
-            new_phone = phone_entry.get()
-            new_address = address_entry.get()
-            new_balance = float(balance_entry.get())
-            self.bank.update_account(account_id, new_password, new_email, new_phone, new_address, new_balance)
-            update_window.destroy()
-        update_window = ctk.CTkToplevel(self.master)
-        update_window.title("Update Account Information")
-        update_window.geometry("400x400")
-        update_window.configure(bg="#1a1a2e")
-        ctk.CTkLabel(update_window, text="Password:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        password_entry = ctk.CTkEntry(update_window, font=("Helvetica", 14))
-        password_entry.insert(0, account_info[0][1])
-        password_entry.grid(row=0, column=1, padx=20, pady=10)
-        ctk.CTkLabel(update_window, text="Email:", font=("Helvetica", 14)).grid(row=1, column=0, padx=20, pady=10, sticky="W")
-        email_entry = ctk.CTkEntry(update_window, font=("Helvetica", 14))
-        email_entry.insert(0, account_info[0][2])
-        email_entry.grid(row=1, column=1, padx=20, pady=10)
-        ctk.CTkLabel(update_window, text="Phone:", font=("Helvetica", 14)).grid(row=2, column=0, padx=20, pady=10, sticky="W")
-        phone_entry = ctk.CTkEntry(update_window, font=("Helvetica", 14))
-        phone_entry.insert(0, account_info[0][3])
-        phone_entry.grid(row=2, column=1, padx=20, pady=10)
-        ctk.CTkLabel(update_window, text="Address:", font=("Helvetica", 14)).grid(row=3, column=0, padx=20, pady=10, sticky="W")
-        address_entry = ctk.CTkEntry(update_window, font=("Helvetica", 14))
-        address_entry.insert(0, account_info[0][4])
-        address_entry.grid(row=3, column=1, padx=20, pady=10)
-        ctk.CTkLabel(update_window, text="Balance:", font=("Helvetica", 14)).grid(row=4, column=0, padx=20, pady=10, sticky="W")
-        balance_entry = ctk.CTkEntry(update_window, font=("Helvetica", 14))
-        balance_entry.insert(0, account_info[0][5])
-        balance_entry.grid(row=4, column=1, padx=20, pady=10)
-        update_button = ctk.CTkButton(update_window, text="Update", command=update, font=("Helvetica", 14))
-        update_button.grid(row=5, column=0, padx=20, pady=20, columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=self.admin_window)
+        self.back_button.grid(row=2, column=0, padx=10, pady=20, columnspan=2)
 
     def deposit_amount(self, account_id, password):
-        def deposit():
-            amount = float(amount_entry.get())
-            self.bank.deposit_amount(amount, account_id, password)
-            deposit_window.destroy()
-        deposit_window = ctk.CTkToplevel(self.master)
-        deposit_window.title("Deposit Amount")
-        deposit_window.geometry("300x150")
-        deposit_window.configure(bg="#1a1a2e")
-        ctk.CTkLabel(deposit_window, text="Amount:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        amount_entry = ctk.CTkEntry(deposit_window, font=("Helvetica", 14))
-        amount_entry.grid(row=0, column=1, padx=20, pady=10)
-        deposit_button = ctk.CTkButton(deposit_window, text="Deposit", command=deposit, font=("Helvetica", 14))
-        deposit_button.grid(row=1, column=0, padx=20, pady=20, columnspan=2)
+        self.clear_window()
+
+        ctk.CTkLabel(self.master, text="Amount to Deposit:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        amount_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        amount_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        deposit_button = ctk.CTkButton(self.master, text="Deposit", command=lambda: self.bank.deposit(account_id, password, float(amount_entry.get())))
+        deposit_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
+
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=2, column=0, padx=10, pady=20, columnspan=2)
 
     def withdraw_amount(self, account_id, password):
-        def withdraw():
-            amount = float(amount_entry.get())
-            self.bank.withdraw_amount(account_id, password, amount)
-            withdraw_window.destroy()
-        withdraw_window = ctk.CTkToplevel(self.master)
-        withdraw_window.title("Withdraw Amount")
-        withdraw_window.geometry("300x150")
-        withdraw_window.configure(bg="#1a1a2e")
-        ctk.CTkLabel(withdraw_window, text="Amount:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        amount_entry = ctk.CTkEntry(withdraw_window, font=("Helvetica", 14))
-        amount_entry.grid(row=0, column=1, padx=20, pady=10)
-        withdraw_button = ctk.CTkButton(withdraw_window, text="Withdraw", command=withdraw, font=("Helvetica", 14))
-        withdraw_button.grid(row=1, column=0, padx=20, pady=20, columnspan=2)
+        self.clear_window()
+
+        ctk.CTkLabel(self.master, text="Amount to Withdraw:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        amount_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        amount_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        withdraw_button = ctk.CTkButton(self.master, text="Withdraw", command=lambda: self.bank.withdraw(account_id, password, float(amount_entry.get())))
+        withdraw_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
+
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=2, column=0, padx=10, pady=20, columnspan=2)
 
     def transfer_amount(self, account_id, password):
-        def transfer():
-            receiver_account_id = receiver_account_id_entry.get()
-            amount = float(amount_entry.get())
-            self.bank.transfer_amount(account_id, password, receiver_account_id, amount)
-            transfer_window.destroy()
-        transfer_window = ctk.CTkToplevel(self.master)
-        transfer_window.title("Transfer Amount")
-        transfer_window.geometry("350x200")
-        transfer_window.configure(bg="#1a1a2e")
-        ctk.CTkLabel(transfer_window, text="Receiver Account ID:", font=("Helvetica", 14)).grid(row=0, column=0, padx=20, pady=10, sticky="W")
-        receiver_account_id_entry = ctk.CTkEntry(transfer_window, font=("Helvetica", 14))
-        receiver_account_id_entry.grid(row=0, column=1, padx=20, pady=10)
-        ctk.CTkLabel(transfer_window, text="Amount:", font=("Helvetica", 14)).grid(row=1, column=0, padx=20, pady=10, sticky="W")
-        amount_entry = ctk.CTkEntry(transfer_window, font=("Helvetica", 14))
-        amount_entry.grid(row=1, column=1, padx=20, pady=10)
-        transfer_button = ctk.CTkButton(transfer_window, text="Transfer", command=transfer, font=("Helvetica", 14))
-        transfer_button.grid(row=2, column=0, padx=20, pady=20, columnspan=2)
+        self.clear_window()
 
+        ctk.CTkLabel(self.master, text="Recipient Account ID:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        recipient_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        recipient_entry.grid(row=0, column=1, padx=10, pady=10)
+
+        ctk.CTkLabel(self.master, text="Amount to Transfer:").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+        amount_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        amount_entry.grid(row=1, column=1, padx=10, pady=10)
+
+        transfer_button = ctk.CTkButton(self.master, text="Transfer", command=lambda: self.bank.transfer(
+            account_id, password, recipient_entry.get(), float(amount_entry.get())
+        ))
+        transfer_button.grid(row=2, column=0, padx=10, pady=20, columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=3, column=0, padx=10, pady=20, columnspan=2)
     def view_balance(self, account_id, password):
+        self.clear_window()
         balance = self.bank.view_balance(account_id, password)
-        messagebox.showinfo("Balance", f"Your balance is: {balance}")
-
+        balance_label = ctk.CTkLabel(self.master, text=f"Current Balance: {balance:.2f} PKR")
+        balance_label.grid(row=0, column=0, padx=10, pady=20, columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
     def view_transaction_history(self, account_id, password):
+        self.clear_window()
         transactions = self.bank.transaction_history(account_id, password)
-        history_window = ctk.CTkToplevel(self.master)
-        history_window.title("Transaction History")
-        history_window.configure(bg="#1a1a2e")
-        for i, transaction in enumerate(transactions):
-            ctk.CTkLabel(history_window, text=f"Date: {transaction[3]}, Type: {transaction[1]}, Amount: {transaction[2]}, Description: {transaction[4]}", font=("Helvetica", 12)).grid(row=i, column=0, padx=20, pady=10)
-
+        title_label = ctk.CTkLabel(self.master, text="Transaction History", font=("Arial", 16, "bold"))
+        title_label.grid(row=0, column=0, padx=10, pady=10, columnspan=2)
+        for i, transaction in enumerate(transactions, start=1):
+            transaction_label = ctk.CTkLabel(self.master, text=f"Date: {transaction[3]}, Type: {transaction[1]}, Amount: {transaction[2]}, Description: {transaction[4]}")
+            transaction_label.grid(row=i, column=0, padx=10, pady=5, sticky="W", columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=i+1, column=0, padx=10, pady=20, columnspan=2)
+    def update_account(self, account_id, password):
+        self.clear_window()
+        user_info = self.bank.view_account(account_id, password)
+        if not user_info:
+            messagebox.showerror("Error", "Failed to retrieve account info")
+            self.user_window(account_id, password)
+            return
+        ctk.CTkLabel(self.master, text="Email:").grid(row=0, column=0, padx=10, pady=10, sticky="W")
+        email_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        email_entry.insert(0, user_info[2])
+        email_entry.grid(row=0, column=1, padx=10, pady=10)
+        ctk.CTkLabel(self.master, text="Phone:").grid(row=1, column=0, padx=10, pady=10, sticky="W")
+        phone_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        phone_entry.insert(0, user_info[3])
+        phone_entry.grid(row=1, column=1, padx=10, pady=10)
+        ctk.CTkLabel(self.master, text="Address:").grid(row=2, column=0, padx=10, pady=10, sticky="W")
+        address_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        address_entry.insert(0, user_info[4])
+        address_entry.grid(row=2, column=1, padx=10, pady=10)
+        ctk.CTkLabel(self.master, text="Balance:").grid(row=3, column=0, padx=10, pady=10, sticky="W")
+        balance_entry = ctk.CTkEntry(self.master, font=("Arial", 12))
+        balance_entry.insert(0, str(user_info[5]))
+        balance_entry.grid(row=3, column=1, padx=10, pady=10)
+        def update():
+            self.bank.update_account(
+            account_id, password, email_entry.get(), phone_entry.get(), address_entry.get(), float(balance_entry.get())
+            )
+            messagebox.showinfo("Update Account", "Account information updated successfully")
+            self.user_window(account_id, password)
+        update_button = ctk.CTkButton(self.master, text="Update", command=update)
+        update_button.grid(row=4, column=0, padx=10, pady=20, columnspan=2)
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=5, column=0, padx=10, pady=20, columnspan=2)
+    def view_account(self, account_id, password):
+        self.clear_window()
+        account_details = self.bank.view_account(account_id, password)
+        if account_details and len(account_details) >= 6:
+            details = (
+                f"Account ID: {account_details[0]}\n"
+                f"Email: {account_details[2]}\n"
+                f"Phone: {account_details[3]}\n"
+                f"Address: {account_details[4]}\n"
+                f"Balance: {account_details[5]}"
+            )
+            messagebox.showinfo("Account Details", details)
+        else:
+            messagebox.showerror("Error", "Failed to retrieve account details or incomplete data")
+        self.back_button = ctk.CTkButton(self.master, text="Back", command=lambda: self.user_window(account_id, password))
+        self.back_button.grid(row=1, column=0, padx=10, pady=20, columnspan=2)
 if __name__ == "__main__":
     root = ctk.CTk()
     app = App(root)
