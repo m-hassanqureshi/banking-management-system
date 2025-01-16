@@ -40,9 +40,9 @@ The Bank Management System is a Python-based application that provides a graphic
     ```
 
 2. **Install dependencies:**
-    Ensure you have all required packages installed. You can install CustomTkinter using pip:
+    Ensure you have all required packages installed.
     ```sh
-    pip install customtkinter
+    pip install requirements.txt
     ```
 
 ## Usage
